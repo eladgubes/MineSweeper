@@ -1,0 +1,80 @@
+.cell{
+    width: 20px;
+    height: 20px;
+    background-color: grey;
+    text-align: center;
+    font-weight: bold;
+    font-size: 12px;
+    cursor: pointer;
+}
+table{
+    width: fit-content;
+    height: fit-content;
+    background-color: lightsteelblue;
+    margin: auto;
+}
+
+.shown{
+    background-color: lightslategray;
+}
+
+
+
+.container{
+    height: 600px;
+    width: 400px;
+    margin: auto;
+    border: black 5px solid;
+    background-color: lightsteelblue;
+   
+}
+
+.UserGestures{
+    height: 80px;
+    width: 400px;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+
+.levels{
+    height: 100px;
+    width: 400px;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+
+
+
+.face{
+    height: 100px;
+    width: 100px;
+    margin: auto;
+}
+
+.face button{
+   font-size: 50px;
+}
+
+.helpers{
+    height: 40px;
+    margin: 2px;
+    border: black 2px solid;
+
+}
+
+.level{
+    height: 25px;
+    width: 396px;
+    text-align: center;
+    border: black 1px solid;
+    margin-bottom: 10px;
+    background-color: honeydew;
+    margin: 1px;
+    font-size: large;
+    font-family: fantasy;
+}
+
+.UserGestures button{
+    height: 80px;
+    width: 100px;
+}
