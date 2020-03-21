@@ -1,8 +1,10 @@
+
+//get random number
 function getRandomInt(min, max) {
     return Math.floor((Math.random() * (max - min)) + min);
 }
 
-
+//render board
 function renderBoard(squareBoard, levelIdx) {
 
     strHTML = `<table><tbody class = "level${levelIdx}">`
@@ -21,17 +23,15 @@ function renderBoard(squareBoard, levelIdx) {
 
 }
 
-
+//render cell
 function renderCell(iCellIdx, jCellIdx) {
 
-   
     var currentCell = gBoard[iCellIdx][jCellIdx];
     var elCurrCell = document.querySelector(`[data-cell="${iCellIdx}-${jCellIdx}"]`)
 
     var minesNumber = gBoard[iCellIdx][jCellIdx].minesAroundCount
 
     if (currentCell.isShown) {
-
         elCurrCell.classList.add('shown');
 
         if (currentCell.isMine) elCurrCell.innerHTML = MINE;
@@ -65,6 +65,7 @@ function cellMarked(elCurrCell, iCellIdx, jCellIdx) {
     renderMinesCount()
 }
 
+//render the mines that left after mark cells
 function renderMinesCount(){
     elMineCount = document.querySelector('.mines')
     var mineCount = gLevels[gLevelIdx].mines-gGame.markedCount
@@ -72,6 +73,7 @@ function renderMinesCount(){
     elMineCount.innerText = mineCount
 }
 
+//change the color of the background
 function renderContainer(gLevelIdx){
     elContainer = document.querySelector('.container')
     elContainer.classList.remove('level0')

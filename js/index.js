@@ -25,7 +25,7 @@ const MARK = '🚩'
 
 var gBoard = [];
 var gLevels = [{ size: 4, mines: 2 }, { size: 8, mines: 12 }, { size: 12, mines: 30 }];
-var gLevelIdx;
+var gLevelIdx = 0;
 var gLives;
 var gSafeClicks;
 var gGame = [{ isOn: false, shownCount: 0, markedCount: 0, secsPassed: 0 }];
@@ -44,7 +44,7 @@ var undoIndex = 0;
 var plays = [];
 
 
-function initGame(levelIdx = 0) {
+function initGame(levelIdx = gLevelIdx) {
     clearInterval(timeInterval)
     gLevelIdx = levelIdx;
     gLives = gHints = gSafeClicks = 3;
@@ -60,7 +60,7 @@ function initGame(levelIdx = 0) {
 }
 
 
-
+//build the game board
 function buildBoard(boardSize) {
     gBoard = []
     for (var i = 0; i < boardSize; i++) {
@@ -95,6 +95,7 @@ function setMinesNegsCount(iCellIdx, jCellIdx) {
             if (!gBoard[i][j].isShown) emptyCells.push({ iIdx: i, jIdx: j })
         }
     }
+    // check for other cells with no mines
     gBoard[iCellIdx][jCellIdx].minesAroundCount = countMines;
     if (!gPeek) {
         if (!countMines && !gBoard[iCellIdx][jCellIdx.isMine]) {
@@ -113,51 +114,50 @@ function setMinesNegsCount(iCellIdx, jCellIdx) {
 
 function cellClicked(elCurrCell, mouseKeyNum) {
 
-
+    //if the game is over, cant click cells
     if (!gGame.isOn) return
 
+    //get the 'i' and 'j' from the cell
     var cellData = elCurrCell.dataset.cell.split('-')
-
-
     var iCellIdx = parseInt(cellData[0])
     var jCellIdx = parseInt(cellData[1])
 
     var currentCell = gBoard[iCellIdx][jCellIdx];
 
+    //set costume mines
     if (gCostume && gCostumeMines > 0) {
         setCostumeMines(iCellIdx, jCellIdx)
         return
     }
-
+    //first cell
     if (mouseKeyNum === 1 && !firstPress) {
         if (!gCostume) setRandomMines(iCellIdx, jCellIdx);
         startClock();
+        gCostume = false
         firstPress = true
     }
 
-
+    //hint option
     if (mouseKeyNum === 1 && hint) {
-
         peekCells(iCellIdx, jCellIdx, true)
         setTimeout(function () { peekCells(iCellIdx, jCellIdx, false) }, 1000);
         hint = false
         return
     }
 
-
+    //mark cell
     if (mouseKeyNum === 3) {
-
         cellMarked(elCurrCell, iCellIdx, jCellIdx);
-        checkGameOver();
-        
+        checkWin();
         return
     }
-
+    //if the cell pressed - cant press again
     if (mouseKeyNum === 1 && currentCell.isMarked) return;
 
-
+    //cell is mine
     if (mouseKeyNum === 1 && currentCell.isMine) {
         gBoard[iCellIdx][jCellIdx].isShown = true
+        renderCell(iCellIdx, jCellIdx)
         if (gLives > 1) setLives()
         else {
             smileyButton(SAD_FACE)
@@ -167,12 +167,12 @@ function cellClicked(elCurrCell, mouseKeyNum) {
         return
     }
 
+    //model update
     if (mouseKeyNum === 1) currentCell.isShown = true;
-
 
     setMinesNegsCount(iCellIdx, jCellIdx);
     undoIndex++
-    checkGameOver();
+    checkWin();
 }
 
 
@@ -193,13 +193,14 @@ function setRandomMines(iCellIdx, jCellIdx) {
     }
 }
 
+//start the clock
 function startClock() {
     startTime = Date.now()
     timeInterval = setInterval(function () { getTime() }, 25)
 
 }
 
-
+//get the current time update the model and render to the dom
 function getTime() {
     var endTime = Date.now()
     gGame.secsPassed = parseInt((endTime - startTime) / 1000)
@@ -219,37 +220,36 @@ function getTime() {
 
 }
 
+//check for win
+function checkWin() {
 
-function checkGameOver() {
-
-    var MarkCellsCounter = 0;
     var showCellsCounter = 0;
-
     for (var i = 0; i < gBoard.length; i++) {
         for (var j = 0; j < gBoard.length; j++) {
-            if (gBoard[i][j].isMarked) MarkCellsCounter++;
-            if (gBoard[i][j].isShown) showCellsCounter++;
+            if (gBoard[i][j].isShown && !gBoard[i][j].isMine) showCellsCounter++;
         }
     }
 
-    if (gBoard.length ** 2 - MarkCellsCounter++ === showCellsCounter) {
+    if (gBoard.length ** 2 - gLevels[gLevelIdx].mines === showCellsCounter) {
         smileyButton(WIN_FACE)
         stopGame()
+        
     }
 
 }
-
+//stop the game
 function stopGame() {
     gGame.isOn = false
     clearInterval(timeInterval)
 
 }
-
+//restart the game
 function restart() {
     clearInterval(timeInterval)
     initGame(gLevelIdx)
 }
 
+//press the hint button 
 function getHint() {
     if (!gHints) return
     gHints--
@@ -266,14 +266,13 @@ function getHint() {
 
 }
 
+//update the smiley face
 function smileyButton(face) {
     document.querySelector('.face button').innerHTML = face
-
 }
 
+// send cell location and show/hide cell + negs
 function peekCells(iCellIdx, jCellIdx, toShow) {
-
-
     for (var i = iCellIdx - 1; i <= iCellIdx + 1; i++) {
         if (i < 0 || i === gBoard.length) continue;
         for (var j = jCellIdx - 1; j <= jCellIdx + 1; j++) {
@@ -282,7 +281,7 @@ function peekCells(iCellIdx, jCellIdx, toShow) {
         }
     }
 }
-
+// send cell location and show/hide cell
 function peekCell(iCellIdx, jCellIdx, toShow) {
     gPeek = true
     gBoard[iCellIdx][jCellIdx].isShown = toShow
@@ -290,12 +289,12 @@ function peekCell(iCellIdx, jCellIdx, toShow) {
     gPeek = false
 }
 
-
+// set strings of the help buttons (hint , safe click, lives)
 function setHelpers() {
     var strHtml = ''
 
     var elHint = document.querySelector('.hints')
-    strHtml = 'Hints <br>'  + HINT + ' ' + HINT + ' ' + HINT
+    strHtml = 'Hints <br>' + HINT + ' ' + HINT + ' ' + HINT
     elHint.innerHTML = strHtml
 
     var elLife = document.querySelector('.lives')
@@ -309,7 +308,7 @@ function setHelpers() {
 }
 
 
-
+// when lose show all the mines
 function showMines() {
 
     for (var i = 0; i < gBoard.length; i++) {
@@ -322,7 +321,7 @@ function showMines() {
     }
 }
 
-
+//press the safe click button - peek one random cell
 function getSafeClick() {
     if (!gSafeClicks) return
     gSafeClicks--
@@ -338,7 +337,7 @@ function getSafeClick() {
         isCellSafe = true
 
     }
-
+    //render the cell (show and hide) and update the button in safe click
     gBoard[randomCol][randomRow].isShown = true;
     peekCell(randomCol, randomRow, true);
     setTimeout(function () { peekCell(randomCol, randomRow, false) }, 3000);
@@ -354,8 +353,8 @@ function getSafeClick() {
     elSafeClick.innerText = strHtml
 }
 
+//update lives after press on a mine
 function setLives() {
-
     gLives--
     var strLife = ''
     for (var i = 0; i < gLives; i++) {
@@ -366,16 +365,15 @@ function setLives() {
     elLife.innerText = strLife
 }
 
-
-
+//update the option for costume level
 function startCostume() {
+    initGame(gLevelIdx)
     gCostume = true
     gCostumeMines = gLevels[gLevelIdx].mines
 }
 
+//set the mines in the costume level
 function setCostumeMines(iCellIdx, jCellIdx, ) {
-
-
 
     if (gBoard[iCellIdx][jCellIdx].isMine) {
         gCostumeMines++
@@ -391,10 +389,10 @@ function setCostumeMines(iCellIdx, jCellIdx, ) {
     renderCell(iCellIdx, jCellIdx)
 
     if (!gCostumeMines) setTimeout(function () { hideMines(mineCells) }, 2000)
-
 }
 
-
+//hide the mines in the costume level 
+// after the user finish 
 function hideMines(mineCells) {
     for (var i = 0; i < mineCells.length; i++) {
         gBoard[mineCells[i].i][mineCells[i].j].isShown = false
@@ -402,7 +400,7 @@ function hideMines(mineCells) {
     }
 }
 
-
+//undo the last play
 function undo() {
 
     var undoPlays = plays.filter(playsCheck)
@@ -414,8 +412,8 @@ function undo() {
     undoIndex--
 }
 
+//find the last play
 function playsCheck(item) {
-
     if (item.index === undoIndex - 1) return true
 }
 
