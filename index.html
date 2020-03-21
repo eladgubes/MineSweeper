@@ -9,29 +9,43 @@
 </head>
 
 <body onload="initGame()">
-    <div class="container">
-        <div class="UserGestures">
-            <div class="face">
-                <button onclick="restart(gLevelIdx)"></button>
-            </div>
-        </div>
+    <div class="backgroundApp">
         <div class="levels">
-            <div class = "level" onclick="initGame(0)">level 1</div>
-            <div class = "level" onclick="initGame(1)">level 2</div>
-            <div class = "level" onclick="initGame(2)">level 3</div>
+            <li>
+                <ul><button onclick="initGame(0)" style="background-image: url('images/frog.jpg');"><span> Level 1
+                        </span></button></ul>
+                <ul><button onclick="initGame(1)" style="background-image: url('images/bear.jpg');"><span>Level
+                            2</span></button></ul>
+                <ul><button onclick="initGame(2)" style="background-image: url('images/tiger.jpg');"><span>Level
+                            3</span></button></ul>
+                <ul><button onclick="startCostume()" style="background-image: url('images/build.jpg');"><span>costume
+                            Level</span></button></ul>
+            </li>
         </div>
+        <div class="container">
+            <div class="UserGestures">
+                <div class="clock">00 : 00 : 00</div>
+                <div class="face">
+                    <button onclick="restart(gLevelIdx)"></button>
+                </div>
+                <div class="mines"></div>
+            </div>
+
+
+
             <div class="gameBoard" oncontextmenu="return false;"></div>
-            <button class="hints" onclick="getHint()"></button>
-            <div class="modal"></div>
-            
+            <div class="helpers">
+                <div class="helper1"><button class="helpBtn hints" onclick="getHint()"></button></div>
+                <div class="helper2"><button class="helpBtn safeClick" onclick="getSafeClick()"></button></div>
+                <div class="helper3"><button class="helpBtn undo" onclick="undo()">undo</button></div>
+            </div>
+
+            <div class="lives"></div>
+
         </div>
-        <script src="js\util.js"></script>
-        <script src="js\index.js"></script>
-    </body>
-    
-    </html>
-    <!-- <div class="helpers safeClick"></div>
-    <div class="helpers hints"></div>
-    <div class="helpers lives"></div>
-    <div class="helpers clock"></div>
-</div> -->
+    </div>
+    <script src="js\util.js"></script>
+    <script src="js\index.js"></script>
+</body>
+
+</html>

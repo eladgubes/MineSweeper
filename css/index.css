@@ -1,80 +1,205 @@
 .cell{
     width: 20px;
     height: 20px;
-    background-color: grey;
     text-align: center;
     font-weight: bold;
     font-size: 12px;
     cursor: pointer;
+    background-color: yellowgreen;
 }
 table{
+   
+    margin-left: auto;
+    margin-right: auto;
+    
+}
+
+tbody{
     width: fit-content;
     height: fit-content;
-    background-color: lightsteelblue;
+}
+
+.gameBoard{
+    min-height: 300px;
+}
+
+.backgroundApp{
+    height: 700px;
+    width: 700px;
+    background-image: url('/images/jungleBackground2.jpg');
     margin: auto;
+    background-size: cover;
+    
+
 }
-
-.shown{
-    background-color: lightslategray;
+.levels{
+    height: fit-content;
+    width: 200px;
+    display: inline-block;
 }
-
-
 
 .container{
     height: 600px;
     width: 400px;
-    margin: auto;
-    border: black 5px solid;
-    background-color: lightsteelblue;
-   
+    margin:auto;
+    border: black 2px solid;
+    /* background-color: lightsteelblue; */
+    display: inline-block;
+    margin-top: 50px;
+    border-radius: 5px;
+
 }
 
 .UserGestures{
-    height: 80px;
+    height: fit-content;
     width: 400px;
     margin-bottom: 10px;
     cursor: pointer;
+    text-align: center;
 }
 
-.levels{
-    height: 100px;
-    width: 400px;
-    margin-bottom: 10px;
-    cursor: pointer;
+.clock{
+    height: 40%;
+    width: 25% ;
+    text-align: center;
+    border: black 1px solid;
+    background-color: honeydew;
+    font-size: large;
+    font-family: fantasy;
+    float: left;
+    margin-top: 15px;
+    margin-left: 20px;
 }
-
-
 
 .face{
-    height: 100px;
-    width: 100px;
-    margin: auto;
+    height: 40%;
+    width: 30%;
+    display: inline-block;
+    margin: auto auto;
 }
 
 .face button{
    font-size: 50px;
+   padding-bottom: 7px;
 }
-
-.helpers{
-    height: 40px;
-    margin: 2px;
-    border: black 2px solid;
-
-}
-
-.level{
-    height: 25px;
-    width: 396px;
+.mines{
+    height: 40%;
+    width: 25%;
     text-align: center;
     border: black 1px solid;
-    margin-bottom: 10px;
+    /* margin-bottom: 10px; */
     background-color: honeydew;
-    margin: 1px;
+    /* margin: 5px; */
     font-size: large;
     font-family: fantasy;
+    /* display: inline-block; */
+    float: right;
+    margin-top: 15px;
+    margin-right: 20px;
+}
+.helpers{
+    height: 100px;
+    margin: 2px;
+  
+    margin: 0px;
+    padding: 0px;
+    text-align: center;
 }
 
-.UserGestures button{
+.helper1 {
+width: 30%;
+height: 100%;
+
+float: left;
+}
+
+.helper2 {
+    display: inline-block;
+    width: 30%;
+    height: 100%;
+   
+    margin: auto auto;
+    
+}
+
+.helper3 {
+    width: 30%;
+    height: 100%;
+    float: right;
+
+}
+
+ .helpBtn{
+    width: 80px;
     height: 80px;
-    width: 100px;
+    font-size: large;
+    font-family: fantasy;
+ }
+
+
+
+
+.lives{
+    height: 50px;
+    width:99%;
+    text-align: center;
+    margin-bottom: 10px;
+    background-color: honeydew;
+    font-size: 36px;
+    font-family: fantasy;  
+    margin: auto auto;
+    
+}
+
+li button{
+    height: 100px;
+    width: 120px;
+    background-size: cover;
+    font-size: 15px;
+    font-weight: bolder;
+
+}
+
+li span{
+    background-color: lightgrey;
+}
+
+
+
+.level0 {
+    background-color: limegreen;
+}
+tbody .level0{
+    background-color: yellow;
+}
+
+.level0 .shown {
+
+    background-color: #ba4100;
+}
+
+
+.level1 {
+    background-color: #728edd;
+}
+
+tbody .level1 {
+    background-color: white;
+}
+
+.level1 .shown {
+
+    background-color: rgb(116, 219, 233);
+}
+
+
+
+.level2 {
+    background-color: orange;
+}
+tbody .level2 {
+    background-color: black;
+}
+.level2 .shown {
+    background-color: orangered;
 }

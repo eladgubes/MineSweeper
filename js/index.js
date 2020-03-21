@@ -36,18 +36,27 @@ var gHints;
 var hint;
 var strHint;
 var firstPress;
-
+var gPeek = false
+var gCostume = false
+var gCostumeMines = 0;
+var mineCells = []
+var undoIndex = 0;
+var plays = [];
 
 
 function initGame(levelIdx = 0) {
-
+    clearInterval(timeInterval)
     gLevelIdx = levelIdx;
+    gLives = gHints = gSafeClicks = 3;
     setHelpers()
     gGame.isOn = true;
     firstPress = false
     buildBoard(gLevels[levelIdx].size);
     renderBoard(gBoard, levelIdx);
     smileyButton(HAPPY_FACE)
+    gGame.markedCount = 0;
+    renderMinesCount()
+    renderContainer(gLevelIdx)
 }
 
 
@@ -87,25 +96,22 @@ function setMinesNegsCount(iCellIdx, jCellIdx) {
         }
     }
     gBoard[iCellIdx][jCellIdx].minesAroundCount = countMines;
+    if (!gPeek) {
+        if (!countMines && !gBoard[iCellIdx][jCellIdx.isMine]) {
 
-    if (!countMines && !gBoard[iCellIdx][jCellIdx.isMine]) {
-
-        for (var k = 0; k < emptyCells.length; k++) {
-
-            gBoard[emptyCells[k].iIdx][emptyCells[k].jIdx].isShown = true
-
-            setMinesNegsCount(emptyCells[k].iIdx, emptyCells[k].jIdx)
-
+            for (var k = 0; k < emptyCells.length; k++) {
+                gBoard[emptyCells[k].iIdx][emptyCells[k].jIdx].isShown = true
+                setMinesNegsCount(emptyCells[k].iIdx, emptyCells[k].jIdx)
+            }
         }
-
     }
     renderCell(iCellIdx, jCellIdx)
+    plays.push({ index: undoIndex, i: iCellIdx, j: jCellIdx })
 }
 
 
 
 function cellClicked(elCurrCell, mouseKeyNum) {
-
 
 
     if (!gGame.isOn) return
@@ -118,9 +124,13 @@ function cellClicked(elCurrCell, mouseKeyNum) {
 
     var currentCell = gBoard[iCellIdx][jCellIdx];
 
+    if (gCostume && gCostumeMines > 0) {
+        setCostumeMines(iCellIdx, jCellIdx)
+        return
+    }
 
     if (mouseKeyNum === 1 && !firstPress) {
-        setRandomMines(iCellIdx, jCellIdx);
+        if (!gCostume) setRandomMines(iCellIdx, jCellIdx);
         startClock();
         firstPress = true
     }
@@ -139,6 +149,7 @@ function cellClicked(elCurrCell, mouseKeyNum) {
 
         cellMarked(elCurrCell, iCellIdx, jCellIdx);
         checkGameOver();
+        
         return
     }
 
@@ -147,16 +158,20 @@ function cellClicked(elCurrCell, mouseKeyNum) {
 
     if (mouseKeyNum === 1 && currentCell.isMine) {
         gBoard[iCellIdx][jCellIdx].isShown = true
-        smileyButton(SAD_FACE)
-        showMines()
-        stopGame()
+        if (gLives > 1) setLives()
+        else {
+            smileyButton(SAD_FACE)
+            showMines()
+            stopGame()
+        }
         return
     }
 
     if (mouseKeyNum === 1) currentCell.isShown = true;
 
-    setMinesNegsCount(iCellIdx, jCellIdx);
 
+    setMinesNegsCount(iCellIdx, jCellIdx);
+    undoIndex++
     checkGameOver();
 }
 
@@ -180,7 +195,7 @@ function setRandomMines(iCellIdx, jCellIdx) {
 
 function startClock() {
     startTime = Date.now()
-    timeInterval = setInterval(function () { getTime() }, 1000)
+    timeInterval = setInterval(function () { getTime() }, 25)
 
 }
 
@@ -188,7 +203,19 @@ function startClock() {
 function getTime() {
     var endTime = Date.now()
     gGame.secsPassed = parseInt((endTime - startTime) / 1000)
-    console.log(gGame.secsPassed)
+
+    var min = parseInt(gGame.secsPassed / 60)
+    var sec = gGame.secsPassed - min * 60
+    var miliSec = parseInt(endTime - startTime / 10) % 100
+
+    if (min < 10) min = '0' + min
+    if (sec < 10) sec = '0' + sec
+
+    var clockStr = min + ' : ' + sec + ' : ' + miliSec
+
+    var elClock = document.querySelector('.clock')
+    elClock.innerHTML = clockStr
+
 
 }
 
@@ -207,6 +234,7 @@ function checkGameOver() {
 
     if (gBoard.length ** 2 - MarkCellsCounter++ === showCellsCounter) {
         smileyButton(WIN_FACE)
+        stopGame()
     }
 
 }
@@ -225,9 +253,9 @@ function restart() {
 function getHint() {
     if (!gHints) return
     gHints--
-    strHint = ''
+    strHint = 'Hints '
     hint = true
-    if (!gHints) strHint = OVER
+    if (!gHints) strHint = 'Hints ' + OVER
     else {
         for (var i = 0; i < gHints; i++) {
             strHint += HINT + ' '
@@ -244,24 +272,40 @@ function smileyButton(face) {
 }
 
 function peekCells(iCellIdx, jCellIdx, toShow) {
-    
+
 
     for (var i = iCellIdx - 1; i <= iCellIdx + 1; i++) {
         if (i < 0 || i === gBoard.length) continue;
         for (var j = jCellIdx - 1; j <= jCellIdx + 1; j++) {
             if (j < 0 || j === gBoard.length) continue;
-            gBoard[i][j].isShown = toShow
-            console.log(gBoard[i][j].isShown);
-            renderCell(i,j)
-
+            peekCell(i, j, toShow)
         }
     }
 }
 
+function peekCell(iCellIdx, jCellIdx, toShow) {
+    gPeek = true
+    gBoard[iCellIdx][jCellIdx].isShown = toShow
+    setMinesNegsCount(iCellIdx, jCellIdx)
+    gPeek = false
+}
+
+
 function setHelpers() {
-    gLives = gHints = gSafeClicks = 3;
+    var strHtml = ''
+
     var elHint = document.querySelector('.hints')
-    elHint.innerText = HINT + ' ' + HINT + ' ' + HINT
+    strHtml = 'Hints <br>'  + HINT + ' ' + HINT + ' ' + HINT
+    elHint.innerHTML = strHtml
+
+    var elLife = document.querySelector('.lives')
+    strHtml = LIVE + ' ' + LIVE + ' ' + LIVE
+    elLife.innerHTML = strHtml
+
+    var elSafeClick = document.querySelector('.safeClick')
+    strHtml = 'Safe Click <br>' + SAFE_CLICK + ' ' + SAFE_CLICK + ' ' + SAFE_CLICK
+    elSafeClick.innerHTML = strHtml
+
 }
 
 
@@ -270,7 +314,7 @@ function showMines() {
 
     for (var i = 0; i < gBoard.length; i++) {
         for (var j = 0; j < gBoard.length; j++) {
-            if (gBoard[i][j].isMine){
+            if (gBoard[i][j].isMine) {
                 gBoard[i][j].isShown = true
                 renderCell(i, j)
             }
@@ -279,21 +323,99 @@ function showMines() {
 }
 
 
+function getSafeClick() {
+    if (!gSafeClicks) return
+    gSafeClicks--
+    var isCellSafe = false
+
+    while (!isCellSafe) {
+        var randomCol = getRandomInt(0, gBoard.length);
+        var randomRow = getRandomInt(0, gBoard.length);
+
+        if (gBoard[randomCol][randomRow].isShown) continue;
+        if (gBoard[randomCol][randomRow].isMine) continue;
+
+        isCellSafe = true
+
+    }
+
+    gBoard[randomCol][randomRow].isShown = true;
+    peekCell(randomCol, randomRow, true);
+    setTimeout(function () { peekCell(randomCol, randomRow, false) }, 3000);
+
+    var strHtml = 'Safe Click '
+    if (!gSafeClicks) strHtml = 'Safe Click ' + OVER
+    else {
+        for (var i = 0; i < gSafeClicks; i++) {
+            strHtml += SAFE_CLICK + ' '
+        }
+    }
+    var elSafeClick = document.querySelector('.safeClick')
+    elSafeClick.innerText = strHtml
+}
+
+function setLives() {
+
+    gLives--
+    var strLife = ''
+    for (var i = 0; i < gLives; i++) {
+        strLife += LIVE + ' '
+    }
+
+    var elLife = document.querySelector('.lives')
+    elLife.innerText = strLife
+}
 
 
-// function getSafeClick(){
 
-//     while (!isNotMine) {
+function startCostume() {
+    gCostume = true
+    gCostumeMines = gLevels[gLevelIdx].mines
+}
 
-//         var randomCol = getRandomInt(0, gLevels[gLevelIdx].size);
-//         var randomRow = getRandomInt(0, gLevels[gLevelIdx].size);
-
-//         if (gBord[randomCol][randomRow].isShown) continue;
-//         if (gBord[randomCol][randomRow].isMine) continue;
-
-//         renderCell(randomCol,randomRow)
+function setCostumeMines(iCellIdx, jCellIdx, ) {
 
 
-//         }
 
-// }
+    if (gBoard[iCellIdx][jCellIdx].isMine) {
+        gCostumeMines++
+        var isSetMine = false
+    } else {
+        gCostumeMines--
+        isSetMine = true
+    }
+    mineCells.push({ i: iCellIdx, j: jCellIdx })
+
+    gBoard[iCellIdx][jCellIdx].isMine = isSetMine
+    gBoard[iCellIdx][jCellIdx].isShown = isSetMine
+    renderCell(iCellIdx, jCellIdx)
+
+    if (!gCostumeMines) setTimeout(function () { hideMines(mineCells) }, 2000)
+
+}
+
+
+function hideMines(mineCells) {
+    for (var i = 0; i < mineCells.length; i++) {
+        gBoard[mineCells[i].i][mineCells[i].j].isShown = false
+        renderCell(mineCells[i].i, mineCells[i].j)
+    }
+}
+
+
+function undo() {
+
+    var undoPlays = plays.filter(playsCheck)
+    console.log()
+    for (var i = 0; i < undoPlays.length; i++) {
+        gBoard[undoPlays[i].i][undoPlays[i].j].isShown = false
+        renderCell(undoPlays[i].i, undoPlays[i].j)
+    }
+    undoIndex--
+}
+
+function playsCheck(item) {
+
+    if (item.index === undoIndex - 1) return true
+}
+

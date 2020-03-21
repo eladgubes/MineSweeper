@@ -5,12 +5,12 @@ function getRandomInt(min, max) {
 
 function renderBoard(squareBoard, levelIdx) {
 
-    strHTML = `<table><tbody>`
+    strHTML = `<table><tbody class = "level${levelIdx}">`
 
     for (var i = 0; i < squareBoard.length; i++) {
         strHTML += `<tr>`
         for (var j = 0; j < squareBoard.length; j++) {
-            strHTML += `<td class="cell" "${levelIdx}" onclick="cellClicked(this,event.which)"
+            strHTML += `<td class="cell level${levelIdx}" onclick="cellClicked(this,event.which)"
              oncontextmenu="cellClicked(this,event.which)" data-cell="${i}-${j}"></td>`
         }
         strHTML += `</tr>`
@@ -24,6 +24,7 @@ function renderBoard(squareBoard, levelIdx) {
 
 function renderCell(iCellIdx, jCellIdx) {
 
+   
     var currentCell = gBoard[iCellIdx][jCellIdx];
     var elCurrCell = document.querySelector(`[data-cell="${iCellIdx}-${jCellIdx}"]`)
 
@@ -54,18 +55,27 @@ function cellMarked(elCurrCell, iCellIdx, jCellIdx) {
     // update model + dom
     if (currentCell.isMarked) {
         currentCell.isMarked = false;
+        gGame.markedCount--
         elCurrCell.innerHTML = ''
     } else {
         currentCell.isMarked = true;
+        gGame.markedCount++
         elCurrCell.innerHTML = MARK
     }
+    renderMinesCount()
 }
 
-// function hideCell(iCellIdx, jCellIdx){
+function renderMinesCount(){
+    elMineCount = document.querySelector('.mines')
+    var mineCount = gLevels[gLevelIdx].mines-gGame.markedCount
+ 
+    elMineCount.innerText = mineCount
+}
 
-//     var elCurrCell = document.querySelector(`[data-cell="${iCellIdx}-${jCellIdx}"]`)
-//     elCurrCell.classList.add('shown');
-//     elCurrCell.innerHTML = gBoard[iCellIdx][jCellIdx].minesAroundCount;
-
-
-// }
+function renderContainer(gLevelIdx){
+    elContainer = document.querySelector('.container')
+    elContainer.classList.remove('level0')
+    elContainer.classList.remove('level1')
+    elContainer.classList.remove('level2')
+    elContainer.classList.add(`level${gLevelIdx}`)
+}
